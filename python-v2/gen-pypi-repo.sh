@@ -87,7 +87,7 @@ for project in ${projects}; do
     distributions="$(jq ".[\"projects\"]|.[\"${project}\"]" < "${assets_dir}/projects.json")"
     pushd "${working_dir}/pypi/${project}/json/"
     curl --silent "https://pypi.org/pypi/${project}/json" > index.html.raw
-    "${assets_dir}/parser.py" index.html.raw "${distributions}" > index.html
+    "${assets_dir}/parser.py" index.html.raw --available_distributions "${distributions}" > index.html
     rm index.html.raw
     popd
 
@@ -101,7 +101,11 @@ for project in ${projects}; do
     done
     wait
     popd
-    # TODO: Replace URLs to PyPI with URLs to $base_url
+
+    pushd "${working_dir}/pypi/${project}/json/"
+   "${assets_dir}/parser.py" index.html --base_url "${base_url}" > index.html
+    popd
+
 done
 
 cp -r --no-preserve=mode --reflink=auto "${working_dir}" "${output_dir}"
